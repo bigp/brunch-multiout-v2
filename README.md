@@ -13,7 +13,7 @@ Changes:
 	* `filesLoop` can be used to supply a function that stores extra fields on each file objects (ie: borderWidth, borderHeight).
 	* Internally parses the filename to catch the {width} and {height} properties of each file objects.
 * Primary file is assigned a bit differently now.
-	* Now you need to add a special file (can be empty), as long it has the filename ``.
+	* Now you need to add a special file (can be empty), as long it has the filename `.primary.txt`.
 
 # Brunch app
 
@@ -43,9 +43,11 @@ Essentially, this not only watches for file-changes, but updates each specific a
 
 What's more, it can also inline all the JS and CSS right into the end product HTML output.
 
-While testing a particular animation, it usually makes sense to test it on *localhost:3333* but given you have seperate HTML pages per ads, how do you indicate which one you are actively working on?
+While testing a particular animation, it usually makes sense to test it on:
 
-You must add an empty *.primary.txt* file in the *app/your_ad_name/* folder of your choice.
+`localhost:3333` but given you have seperate HTML pages per ads, how do you indicate which one you are actively working on?
+
+You must add an empty `.primary.txt` file in the `app/your_ad_name/` folder of your choice.
 
 A typical configuration file looks something like this:
 
