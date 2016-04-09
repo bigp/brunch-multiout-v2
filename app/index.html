@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="ad.size" content="width={{width}},height={{height}}">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+  <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
+
+  <title>{{name}}</title>
+  <script src="https://s0.2mdn.net/ads/studio/Enabler.js"></script> <!-- Enabler should always come first. -->
+  <script src="https://s0.2mdn.net/ads/studio/cached_libs/timelinemax_1.18.0_d3d029f5637c6d5b293e574d258b5eee_min.js"></script>
+  <script src="https://s0.2mdn.net/ads/studio/cached_libs/tweenmax_1.18.0_499ba64a23378545748ff12d372e59e9_min.js"></script>
+  <script src="https://s0.2mdn.net/ads/studio/cached_libs/easepack_1.18.0_ed5816e732515f56d96a67f6a2a15ccb_min.js"></script>
+  <script src="https://s0.2mdn.net/ads/studio/cached_libs/cssplugin_1.18.0_71489205621d46cbe88348eeb8fe493f_min.js"></script>
+  <script src="/js/vendor.js"></script> <!-- @merge: JS -->
+  <script src="/js/{{name}}.js"></script> <!-- @merge: JS -->
+  <link rel="stylesheet" type="text/css" href="/css/vendor.css"> <!-- @merge: CSS -->
+  <link rel="stylesheet" type="text/css" href="/css/{{name}}.css"> <!-- @merge: CSS -->
+  <style>
+    /* @paste: CSS */
+
+    /* Ad Specific size CSS */
+    #content { width: {{width}}px; height: {{height}}px; }
+    #border { width: {{borderWidth}}px; height: {{borderHeight}}px; }
+  </style>
+</head>
+<body>
+
+<div id="content">
+  <a id="link" href="javascript:window.open(window.clickTag)">
+    <div id="animation"></div>
+    <div id="border"></div>
+  </a>
+</div>
+
+<script>
+  // @paste: JS
+
+  // Atlas and ClickTag variables:
+  var atlasURL = "{{name}}.png";
+  var clickTag = "http://www.google.com";
+</script>
+
+</body>
+</html>

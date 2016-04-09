@@ -1,0 +1,9 @@
+//
+// Created with TexturePacker http://www.codeandweb.com/texturepacker
+//
+// SmartUpdateHash: {{smartUpdateKey}}
+//
+{% load makecssselector %}
+.sprite { display:inline-block; overflow: hidden; background: url('{% if settings.textureSubPath %}{{settings.textureSubPath}}/{% endif %}{{texture.fullName}}') no-repeat; }
+{% for sprite in sprites %}
+.{{sprite.trimmedName|makecssselector}} { width: {{sprite.frameRect.width}}px; height: {{sprite.frameRect.height}}px; background-position: -{{sprite.frameRect.x}}px -{{sprite.frameRect.y}}px; }{% endfor %}
