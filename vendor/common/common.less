@@ -1,0 +1,47 @@
+html, body { overflow: hidden; width: 100%; height: 100%; }
+html, body, #content, #animation, #border, #link, .abs, .sprite {
+  position: absolute;
+}
+
+#border { border: solid 1px #444; }
+#content, #animation {
+  top: 0; left: 0;
+  overflow: hidden;
+}
+
+#animation, #link //, .master, .background
+{ width: 100%; height: 100%; }
+
+.right { left: auto; right: 0; }
+.bottom { top: auto; bottom: 0; }
+
+////////////// MIXINS:
+
+.transform(@transform) {
+  -webkit-transform: @transform;
+  -moz-transform: @transform;
+  -ms-transform: @transform;
+  -o-transform: @transform;
+  transform: @transform;
+}
+
+.scale(@x, @y: @x) {
+  -webkit-transform: scale(@x, @y);
+  -moz-transform: scale(@x, @y);
+  -ms-transform: scale(@x, @y);
+  -o-transform: scale(@x, @y);
+  transform: scale(@x, @y);
+}
+
+.origin(@origin) {
+  -webkit-transform-origin: @origin;
+  -moz-transform-origin: @origin;
+  -ms-transform-origin: @origin;
+  -o-transform-origin: @origin;
+  transform-origin: @origin;
+}
+
+.xy(@x, @y) {
+  left: @x;
+  top: @y;
+}

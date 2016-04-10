@@ -136,7 +136,7 @@ var multiout = module.exports.multiout = {
         this.populateWatchedFiles(allFiles);
         this.populateSeperateOutputs(this.config.folderPattern, ".js", jsFiles);
         //this.populateSeperateOutputs(folderPattern, ".css", cssFiles);
-        this.populateSeperateOutputs(this.config.folderPattern, ".(css|less):.css", cssFiles);
+        this.populateSeperateOutputs(this.config.folderPattern, ".less:.css", cssFiles);
         this.jsFiles = jsFiles;
         this.cssFiles = cssFiles;
         info(this.config);
@@ -287,7 +287,7 @@ var multiout = module.exports.multiout = {
                     if (task.silent === true)
                         return;
                     if (cmd.stderr && cmd.stderr.length > 0) {
-                        trace("ERROR: " + task.name + " failed: \n" + cmd.stderr);
+                        trace("ERROR: " + task.name + " failed: " + cmd.code + "\n" + cmd.stderr);
                         return;
                     }
                     else {
@@ -426,4 +426,3 @@ var builtinTasks = {
         _THIS._lastHTMLFile = htmlOut;
     }
 };
-//# sourceMappingURL=multiout.js.map

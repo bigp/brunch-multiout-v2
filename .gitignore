@@ -8,6 +8,7 @@ app/en_*
 app/fr_*
 app/images_*
 .hg*
+hg_*
 
 # Folder config file
 Desktop.ini
