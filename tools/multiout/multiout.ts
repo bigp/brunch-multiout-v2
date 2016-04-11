@@ -2,19 +2,37 @@ declare var require;
 declare var module;
 declare var process;
 const fs = require('fs');
+const __dirModules = process.mainModule.paths[2];
+const anymatch = require(__dirModules+'/anymatch');
+const crypto = require('crypto');
 const spawn = require('child_process').spawnSync;
 const trace = console.log.bind(console);
 const UTF_8 = {encoding: "utf-8"};
 var root = "./app/";
 var allFiles = recursiveGetFiles(root);
+var isProduction = process.argv.indexOf("-p")>-1 ? 1 : 0;
 
 function clear() {
     console.log('\033[2J');
 }
 
+function makeMD5(str:any):string {
+    if(str==null) return "";
+    return crypto.createHash('md5').update(str.toString()).digest('hex');
+}
+
 RegExp.prototype['toJSON'] = function() {
     return this.source;
 };
+
+function gsub(str, ... args) {
+    //var args = Array.prototype.slice(arguments, 1);
+    for(var a=args.length; --a>=0;) {
+        var pattern = new RegExp("%"+a, "g");
+        str = str.replace(pattern, args[a]);
+    }
+    return str;
+}
 
 function info(... args) {
     if(!multiout.config.isInfo) return;
@@ -32,7 +50,7 @@ function endsWith(path, char:string) {
     return path;
 }
 
-function recursiveGetFiles(path, allFiles:Array<string>=[], exceptions:Array<string>=[]) {
+function recursiveGetFiles(path, foundFiles:Array<string>=[], exceptions:Array<string>=[]) {
     path = endsWith(path, "/");
     var files = fs.readdirSync(path);
     files.forEach(function(file) {
@@ -41,14 +59,14 @@ function recursiveGetFiles(path, allFiles:Array<string>=[], exceptions:Array<str
         if(fs.lstatSync(fullpath).isDirectory()) {
             if(exceptions.indexOf(file)>-1) return;
 
-            allFiles.push(fullpath);
-            recursiveGetFiles( fullpath, allFiles);
+            foundFiles.push(fullpath);
+            recursiveGetFiles( fullpath, foundFiles);
         } else {
-            allFiles.push(fullpath);
+            foundFiles.push(fullpath);
         }
     });
 
-    return allFiles;
+    return foundFiles;
 }
 
 function fileExists(path:string):boolean {
@@ -133,30 +151,78 @@ module.exports.configMultiout = function(config) {
 var multiout = module.exports.multiout = {
     cmdParam: null,
     config: null,
+    before: function() { this.process("before"); },
+    after: function() { this.process("after"); },
 
     populateTypicalAdFormats: function() {
-        if(!this.config) throw new Error("Missing multiout's config property!");
-        if(!this.config.folderPattern) this.config.folderPattern = /^(en|fr)[0-9a-z_\-]*/i;
+        var config = this.config;
+        if(!config) throw new Error("Missing multiout's config property!");
+        if(!config.folderPattern) config.folderPattern = /^(en|fr)[0-9a-z_\-]*/i;
+        if(!config.commonJS) config.commonJS = "app/common/env_" + (isProduction ? "prod\\.js" : "debug\\.js");
+        if(!config.commonCSS) config.commonCSS = "app/common/.*\\.(less|css)";
 
-        var jsFiles = {'js/vendor.js': /^vendor\/[a-zA-Z0-9_\-\/]*\.js/};
-        var cssFiles = {'css/vendor.css': /^vendor\/[a-zA-Z0-9_\-\/]*\.(css|less)/};
+        var vendorJS = "vendor\\/[a-zA-Z0-9_\\-\\/]*\\.js";
+        var vendorCSS = "vendor\\/[a-zA-Z0-9_\\-\\/]*\\.(less|css)";
+        if(config.commonJS) vendorJS += "|" + config.commonJS;
+        if(config.commonCSS) vendorCSS += "|" + config.commonCSS;
+        var jsFiles = {'js/vendor.js': new RegExp("^("+vendorJS+")")};
+        var cssFiles = {'css/vendor.css': new RegExp("^("+vendorCSS+")")};
 
         this.populateWatchedFiles(allFiles);
-        this.populateSeperateOutputs(this.config.folderPattern, ".js", jsFiles);
+        this.populateSeperateOutputs(config.folderPattern, ".js", jsFiles);
         //this.populateSeperateOutputs(folderPattern, ".css", cssFiles);
-        this.populateSeperateOutputs(this.config.folderPattern, ".less:.css", cssFiles);
+        this.populateSeperateOutputs(config.folderPattern, ".(less|css):.css", cssFiles);
 
         this.jsFiles = jsFiles;
         this.cssFiles = cssFiles;
 
-        info(this.config);
+        if(config.pollFileChanges) {
+            this.runCustomFileChecker( config.pollFileChanges );
+        }
 
-        if(this.config.traceWatchedFiles) {
+        if(config.traceWatchedFiles) {
             var sep = "==========================================";
             trace(sep); trace("jsFiles: " + JSON.stringify(this.jsFiles, null, '  '));
             trace(sep); trace("cssFiles: " + JSON.stringify(this.cssFiles, null, '  '));
-            trace(sep);
+            trace(sep); trace("watchFolders: " + JSON.stringify(this.watchFolders, null, '  '));
+
+            if(this.foundPrimary) {
+                trace("\n   ** Working on primary file: " + this.foundPrimary.name + " **\n");
+            }
         }
+    },
+
+    runCustomFileChecker: function(params) {
+        var _THIS = this;
+        var fileTypes = anymatch( params.fileTypes || "**/*.*" );
+        var pollRate = params.pollRate || 1000;
+        var trigger = params.trigger || function() { _THIS.before(); };
+        var md5Before = null, isBusy = false;
+
+        // TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+        function getFileDate(file) {
+            return fs.statSync(file)['mtime'];
+        }
+
+        function callCheck() {
+            if(isBusy);
+            var currentFiles = recursiveGetFiles(root);
+            var validFiles = currentFiles.filter(fileTypes);
+            var sumStats = "";
+            validFiles.forEach(file => {sumStats += getFileDate(file);} );
+            var md5Now = makeMD5( sumStats );
+
+            if(md5Now!=md5Before) { //md5Before!=null
+                isBusy = true;
+                trigger();
+                isBusy = false;
+            }
+            md5Before = md5Now;
+            setTimeout( callCheck, pollRate );
+        }
+
+        setTimeout( callCheck, pollRate );
     },
 
     populateWatchedFiles: function(allFiles) {
@@ -166,16 +232,20 @@ var multiout = module.exports.multiout = {
         var files = config.files;
         var foundPrimary = null;
         var primaryFlagFile = config.primaryFlagFile || ".primary.txt";
+
+        var watchFolders = this.watchFolders = ["vendor","app/common"];
+        var watchInitLength = watchFolders.length;
+
         allFiles.forEach( function(fullpath) {
             var shortpath = fullpath.substr(root.length);
             if(!config.folderPattern.test(shortpath) || shortpath.indexOf("/")>-1) return;
 
-            var fileObj = {name: shortpath, isPrimary: false};
+            var fileObj = {name: shortpath, fullpath: fullpath, isPrimary: false};
             multiout.internalFileLoop( fileObj );
             config.filesLoop && config.filesLoop(fileObj);
             files.push(fileObj);
 
-            // TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            watchFolders.push(fullpath);
 
             var primaryPath = fullpath+"/"+primaryFlagFile;
             if(fileExists(primaryPath)) {
@@ -193,7 +263,7 @@ var multiout = module.exports.multiout = {
 
         if(foundPrimary) {
             var filename = foundPrimary.name;
-
+            watchFolders.splice(watchInitLength, watchFolders.length, foundPrimary.fullpath);
             config.folderPattern = new RegExp("^" + filename);
             trace("[PRIMARY FILE FOUND]: changing pattern to: \"%s\"\n", config.folderPattern);
         }
@@ -229,13 +299,14 @@ var multiout = module.exports.multiout = {
             var filesSrc = "^"+removeBeginsWith(completePath,"./")+"/.*\\"+ext;
             var filesRegex = new RegExp(filesSrc,"gi");
             //trace(mergedname + " -- " + filesSrc + " -- " + filesRegex.source);
+
             files[mergedname] = filesRegex;
         });
 
         return files;
     },
 
-    process: function(currentName:string, isProd:boolean) {
+    process: function(currentName:string) {
         if(!this.config) throw new Error("Missing configuration for multiout!");
 
         var config = this.config;
@@ -281,10 +352,15 @@ var multiout = module.exports.multiout = {
             _THIS._indexDefault = _THIS._outputDir + _THIS.foundPrimary.name + ".html";
         }
 
+        function showOutput(str, header) {
+            if(str==null || str.length==0) return "";
+            return header + " " + str;
+        }
+
         currentFiles.forEach( function(adUnit) {
             if(_THIS.foundPrimary!=null) {
-                if(_THIS.foundPrimary!=adUnit) return;
-                trace("Working on primary file: " + adUnit.name);
+               if(_THIS.foundPrimary!=adUnit) return;
+
             }
 
             if(!fileExists("app/" + adUnit.name)) {
@@ -292,10 +368,6 @@ var multiout = module.exports.multiout = {
                 return;
             }
 
-            /*if(isAFTER) {
-                _THIS._currentInput = resolveHandleBars(_THIS._inputFileContent, adUnit);
-            }*/
-            //trace(currentTasks);
             currentTasks.forEach( function(task) {
                 if(task.name==null || task.name.length==0 || task.off===true) return;
                 var resolvedArgs = resolveHandleBars(task.args, adUnit).split(" ");
@@ -306,24 +378,15 @@ var multiout = module.exports.multiout = {
                 info("  [TASK] %s %s", taskExec, "\n  ... " + resolvedArgs.join("\n  ... "));
 
                 if(builtinTasks[task.name]!=null) {
-                    builtinTasks[task.name].call(_THIS, adUnit, resolvedArgs);
+                    builtinTasks[task.name].call(_THIS, adUnit, resolvedArgs, task);
                 } else {
                     var cmd = spawn(taskExec, resolvedArgs, UTF_8);
-                    if(task.silent===true) return;
-                    if(cmd.stderr && cmd.stderr.length>0) {
-                        trace("ERROR: " + task.name + " failed: "+cmd.code+"\n" + cmd.stderr);
-                        return;
-                    } else {
-                        trace(cmd.stdout);
-                    }
+                    if(task.silent || _THIS.config.silenceTasks) return;
+                    var output =    showOutput(cmd.stdout, gsub("==== STDOUT %0 ====\n", task.name)) + "\n" +
+                                    showOutput(cmd.stderr, gsub("==== STDERR %0 ====\n", task.name));
+                    trace(output);
                 }
             });
-
-            /*if(isAFTER) {
-                //var htmlOut = _THIS._outputDir + removeBeginsWith( resolveHandleBars( configArgs[0], adUnit ), "./" );
-
-                _THIS._currentInput = resolveHandleBars(_THIS._inputFileContent, adUnit);
-            }*/
         });
 
         if(isAFTER) {
@@ -351,7 +414,7 @@ const TAG_PASTE = "@paste:";
 const TAG_SOURCES = "src=,href=".split(',');
 
 var builtinTasks = {
-    'merge-and-paste': function mergeAndPaste(adUnit, configArgs) {
+    'merge-and-paste': function mergeAndPaste(adUnit, configArgs, task) {
         var _THIS = this;
 
         if(configArgs==null) {
@@ -442,22 +505,13 @@ var builtinTasks = {
             return str;
         }
 
-        /**
-         * TODO: Does the ARGS really need to be a string?
-         *      Couldn't it sometimes be a raw Object that could be
-         *      accessed by its fields?
-         */
+        var reps = task.replace;
+        if(reps!=null) {
+            for(var r=0; r<reps.length; r+=2) {
+                var a = escapedForRegex(reps[r]);
+                var b = reps[r+1];
 
-        if(configArgs.length>=2) {
-            var extraParams = JSON.parse(configArgs[1]);
-            if(extraParams.replace) {
-                var reps = extraParams.replace;
-                for(var r=0; r<reps.length; r+=2) {
-                    var a = escapedForRegex(reps[r]);
-                    var b = reps[r+1];
-
-                    output = output.replace(new RegExp(a, "g"), b);
-                }
+                output = output.replace(new RegExp(a, "g"), b);
             }
         }
 

@@ -12,14 +12,15 @@
   <script src="https://s0.2mdn.net/ads/studio/cached_libs/tweenmax_1.18.0_499ba64a23378545748ff12d372e59e9_min.js"></script>
   <script src="https://s0.2mdn.net/ads/studio/cached_libs/easepack_1.18.0_ed5816e732515f56d96a67f6a2a15ccb_min.js"></script>
   <script src="https://s0.2mdn.net/ads/studio/cached_libs/cssplugin_1.18.0_71489205621d46cbe88348eeb8fe493f_min.js"></script>
-  <script src="/js/vendor.js"></script> <!-- @merge: JS -->
-  <script src="/js/{{name}}.js"></script> <!-- @merge: JS -->
-  <link rel="stylesheet" type="text/css" href="/css/vendor.css"> <!-- @merge: CSS -->
-  <link rel="stylesheet" type="text/css" href="/css/{{name}}.css"> <!-- @merge: CSS -->
+  <script src="js/vendor.js"></script> <!-- @merge: JS -->
+  <script src="js/{{name}}.js"></script> <!-- @merge: JS -->
+  <link rel="stylesheet" type="text/css" href="css/vendor.css"> <!-- @merge: CSS -->
+  <link rel="stylesheet" type="text/css" href="css/{{name}}.css"> <!-- @ merge: CSS -->
   <style>
     /* @paste: CSS */
 
     /* Ad Specific size CSS */
+    .sprite { background-image: url('{{name}}.png'); }  /**** REMOVE WHEN DONE *****/
     #content { width: {{width}}px; height: {{height}}px; }
     #border { width: {{borderWidth}}px; height: {{borderHeight}}px; }
   </style>

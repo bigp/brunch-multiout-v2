@@ -2,14 +2,12 @@ declare var TweenMax, TimelineMax, CSSPlugin, Ease;
 declare var Quad, Quint, Cubic, Back, Elastic, Bounce, Sine, Circ, Linear;
 declare var Enabler, studio;
 declare var Ad, atlasURL:string;
+declare var log, trace;
 
 var d = document, w=window, defaults, ad, isDebug = false;
 
-var trace = console.log.bind(console);
-var log = console.log.bind(console);
-
 function isArray(o) {
-    return (o instanceof Array) || o.hasOwnProperty('length');
+    return o!=null && ((o instanceof Array) || o.hasOwnProperty('length'));
 }
 
 function rem(arr, o) {
@@ -63,60 +61,38 @@ var getQueryVariable = (function() {
     };
 })();
 
-(function() {
-    var clickTagHandler;
-    w.onload = _preload;
+class AdPreloader {
+    clickTagHandler:any;
+    preload:any;
+    prepareAd:any;
+    callMain:any;
 
-    function _preload() {
-        if (w.location.hostname == "localhost" && w.location.port == "3333") {
-            trace(w.document.title = "*LOCAL* " + w.document.title);
-        }
+    constructor() {
+        var _THIS = this;
+        _THIS.clickTagHandler = null;
+        _THIS.preload = function() { _THIS._preload() };
+        _THIS.prepareAd = function() { _THIS._prepareAd() };
+        _THIS.callMain = function() { _THIS._callMain() };
 
-        if(getQueryVariable('debug')) {
-            var b = d.body;
-            isDebug = true;
-            b.classList.add('debug');
-            b.addEventListener("keydown", function(e) {
-                switch(e.keyCode) {
-                    case 13: ad.onEnter && ad.onEnter(); break;
-                }
-            });
-        }
-
-        //Check if DoubleClick Enabler is missing:
-        if (isDebug || !w['Enabler'] || !w['studio']) {
-            trace("**DoubleClick Enabler not loaded!**");
-            _callMain();
-        } else {
-            var SE = studio.events.StudioEvent;
-
-            function Enabler_init() {
-                // Polite loading
-                Enabler.isVisible() ? _callMain() : Enabler.addEventListener(SE.VISIBLE, _callMain);
-
-                clickTagHandler = function Enabler_clickTag() { Enabler.exit('Background Exit'); };
-            }
-
-            // If true, start function. If false, listen for INIT.
-            Enabler.isInitialized() ? Enabler_init() : Enabler.addEventListener(SE.INIT, Enabler_init);
-        }
+        w.onload = this.preload;
     }
 
-    function _callMain() {
+     _callMain() {
+        var _THIS = this;
+         trace("main: " + _THIS);
         if(w['atlasURL']!=null) {
-            trace("Preloading atlasURL '%s' ...", atlasURL);
             var img = new Image();
             img.addEventListener("load", function() {
-                trace("Downloaded atlasURL '%s'.", atlasURL);
-                isDebug ? setTimeout( _prepareAd, 250 ) : _prepareAd();
+                isDebug ? setTimeout( _THIS.prepareAd, 250 ) : _THIS.prepareAd();
             });
             img.src = atlasURL;
-        } else _prepareAd();
+        } else _THIS.prepareAd();
     }
 
+    _preload() {} //Overriden
 
-
-    function _prepareAd() {
+    _prepareAd() {
+        var _THIS = this;
         var clickTarget = id("link");
         defaults = {
             attachTo: id("content"),
@@ -124,25 +100,32 @@ var getQueryVariable = (function() {
         };
 
         //Create the Ad, init and play it:
-        if(window['Ad']==null) {
+        if(!window['Ad']) {
             trace("No Ad object defined!"); return;
         }
 
         ad = new Ad();
         ad.play(defaults.timeline);
-        // /*
+
         clickTarget.addEventListener("click", function() {
-            if(!clickTagHandler) trace("No click tag");
-            else clickTagHandler();
+            if(!_THIS.clickTagHandler) trace("No click tag");
+            else _THIS.clickTagHandler();
             ad.onClick && ad.onClick();
         });
-        // */
 
         defaults.timeline.call( function() {
             ad.onEnd && ad.onEnd();
         });
+
+        _THIS._onAdCreated();
     }
-})();
+
+    _onAdCreated() {
+
+    }
+};
+
+var adPreloader = new AdPreloader();
 
 function makeDiv(classes=null, attachTo=null) {
     if(attachTo==null) attachTo = defaults.attachTo;
