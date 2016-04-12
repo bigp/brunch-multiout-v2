@@ -21,20 +21,23 @@ AdPreloader.prototype._preload = function() {
         });
     }
 
-    if(!w['clickTag']) {
-        document.body.innerHTML += "<h1 class=\"warning\">MISSING<br/>CLICKTAG!</h1>";
-    }
-
-    //Check if eyeBuild is missing:
-    if (isDebug || !w['eyeBuild']) {
-        trace("**eyeReturn not loaded!**");
+    //Check if DoubleClick Enabler is missing:
+    if (isDebug || !w['Enabler'] || !w['studio']) {
+        trace("**DoubleClick Enabler not loaded!**");
         _THIS.callMain();
     } else {
-        trace("eyeReturn loading...");
-        eyeBuild.initialize();
+        trace("DoubleClick loading...");
+        var SE = studio.events.StudioEvent;
 
-        _THIS.clickTagHandler = function() { eyeBuild.doClick(0); };
-        _THIS.callMain();
+        function Enabler_init() {
+            // Polite loading
+            Enabler.isVisible() ? _THIS.callMain() : Enabler.addEventListener(SE.VISIBLE, _THIS.callMain);
+
+            _THIS.clickTagHandler = function Enabler_clickTag() { Enabler.exit('Background Exit'); };
+        }
+
+        // If true, start function. If false, listen for INIT.
+        Enabler.isInitialized() ? Enabler_init() : Enabler.addEventListener(SE.INIT, Enabler_init);
     }
 };
 

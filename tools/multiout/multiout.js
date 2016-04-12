@@ -173,7 +173,7 @@ var multiout = module.exports.multiout = {
         this.populateSeperateOutputs(config.folderPattern, ".(less|css):.css", cssFiles);
         this.jsFiles = jsFiles;
         this.cssFiles = cssFiles;
-        if (config.pollFileChanges) {
+        if (!isProduction && config.pollFileChanges) {
             this.runCustomFileChecker(config.pollFileChanges);
         }
         if (config.traceWatchedFiles) {
@@ -223,7 +223,7 @@ var multiout = module.exports.multiout = {
             config.files = [];
         var files = config.files;
         var foundPrimary = null;
-        var primaryFlagFile = config.primaryFlagFile || ".primary.txt";
+        var primaryFlagFile = config.primaryFlagFile || "focus.primary";
         var watchFolders = this.watchFolders = ["vendor", "app/common"];
         var watchInitLength = watchFolders.length;
         allFiles.forEach(function (fullpath) {
@@ -346,7 +346,7 @@ var multiout = module.exports.multiout = {
             currentTasks.forEach(function (task) {
                 if (task.name == null || task.name.length == 0 || task.off === true)
                     return;
-                var resolvedArgs = resolveHandleBars(task.args, adUnit).split(" ");
+                var resolvedArgs = task.args == null ? [] : resolveHandleBars(task.args, adUnit).split(" ");
                 reduceExistingDirectories(resolvedArgs);
                 var taskExec = resolveEnvVars(task.name);
                 info("  [TASK] %s %s", taskExec, "\n  ... " + resolvedArgs.join("\n  ... "));
@@ -385,6 +385,15 @@ var TAG_MERGE = "@merge:";
 var TAG_PASTE = "@paste:";
 var TAG_SOURCES = "src=,href=".split(',');
 var builtinTasks = {
+    /*'prettytype': function(adUnit, configArgs, task) {
+        var _THIS = this;
+        var jsFile = _THIS._outputDir + "js/" + adUnit.name + ".js";
+        trace(jsFile + " : "  + fileExists(jsFile));
+        var jsContent = readFile(jsFile);
+        var prettifiedTag = "@prettified ;)";
+        //if(jsContent.indexOf(prettifiedTag)>-1) return;
+        //var jsLines =
+    },*/
     'merge-and-paste': function mergeAndPaste(adUnit, configArgs, task) {
         var _THIS = this;
         if (configArgs == null) {

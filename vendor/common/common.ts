@@ -92,11 +92,11 @@ class AdPreloader {
     _preload() {} //Overriden
 
     _prepareAd() {
-        var _THIS = this;
+        var twn, _THIS = this;
         var clickTarget = id("link");
         defaults = {
             attachTo: id("content"),
-            timeline: new TimelineMax()
+            timeline: twn = new TimelineMax()
         };
 
         //Create the Ad, init and play it:
@@ -105,7 +105,7 @@ class AdPreloader {
         }
 
         ad = new Ad();
-        ad.play(defaults.timeline);
+        ad.play(twn);
 
         clickTarget.addEventListener("click", function() {
             if(!_THIS.clickTagHandler) trace("No click tag");
@@ -113,15 +113,11 @@ class AdPreloader {
             ad.onClick && ad.onClick();
         });
 
-        defaults.timeline.call( function() {
+        twn.call( function() {
             ad.onEnd && ad.onEnd();
         });
 
-        _THIS._onAdCreated();
-    }
-
-    _onAdCreated() {
-
+        _THIS._onAdCreated && _THIS._onAdCreated();
     }
 };
 

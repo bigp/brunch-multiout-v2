@@ -6,17 +6,13 @@ var trace, log;
 trace = log = function(){};
 
 AdPreloader.prototype._preload = function() {
-    if(!w['Enabler'] || !w['studio']) throw new Error("Missing Enabler");
+    if (isDebug || !w['eyeBuild']) throw new Error("**eyeReturn not loaded!**");
     var _THIS = this;
-    var SE = studio.events.StudioEvent;
 
-    function Enabler_init() {
-        // Polite loading
-        Enabler.isVisible() ? _THIS.callMain() : Enabler.addEventListener(SE.VISIBLE, _THIS.callMain);
+    //Check if eyeBuild is missing:
+    eyeBuild.initialize();
 
-        _THIS.clickTagHandler = function Enabler_clickTag() { Enabler.exit('Background Exit'); };
-    }
+    _THIS.clickTagHandler = function() { eyeBuild.doClick(0); };
+    _THIS.callMain();
 
-    // If true, start function. If false, listen for INIT.
-    Enabler.isInitialized() ? Enabler_init() : Enabler.addEventListener(SE.INIT, Enabler_init);
 };

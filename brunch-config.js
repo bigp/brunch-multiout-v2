@@ -9,13 +9,13 @@ var multiout = require("./tools/multiout/multiout.js").configMultiout({
 
   init: true,
   isDebug: isProduction==0,
-  pollFileChanges: {
+  /*pollFileChanges: {
     fileTypes: /\.png/,
     trigger: function() {
       multiout.before();
       multiout.sendMessage(['page']);
     }
-  },
+  },*/
 
   //isInfo: true,
   traceWatchedFiles: true,
@@ -34,6 +34,7 @@ var multiout = require("./tools/multiout/multiout.js").configMultiout({
     outputDir: "public/",
     outputName: "{{name}}.html",
     tasks: [
+      //{name: 'prettytype', silent: false},
       {name: 'merge-and-paste', silent: true, args: "{{name}}.html", replace: [".png","-fs8.png"]}
     ]
   }
@@ -45,6 +46,22 @@ module.exports = {
   paths: {
     "public": "public",
     "watched": multiout.watchFolders
+  },
+  overrides: {
+    production: {
+      optimize: false,
+      plugins: {
+        uglify: {
+          mangle: true,
+          dead_code: true,
+          sequences: true,
+          properties: true,
+          conditionals: true,
+          //beautify: true,
+          compress: { global_defs: { DEBUG: false }, hoist_vars: true }
+        }
+      }
+    }
   },
 
   //optimize: true,
@@ -60,15 +77,17 @@ module.exports = {
         stylesheets: '**/*.css',
         javascripts: '**/*.js'
       }
-    },
+    }//,
+    /*
     uglify: {
-      mangle: true,
+      mangle: false, //used to be: true
       dead_code: true,
       sequences: true,
       properties: true,
       conditionals: true,
       compress: { global_defs: { DEBUG: false }, hoist_vars: true }
     }
+    */
   },
 
   preCompile: function() {

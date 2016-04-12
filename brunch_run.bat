@@ -1,5 +1,3 @@
 cls
 
-brunch watch --server
-
-pause
+nodemon -V -L --watch app -e primary --exec "brunch watch --server"

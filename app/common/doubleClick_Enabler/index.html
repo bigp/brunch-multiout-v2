@@ -7,17 +7,15 @@
   <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height" />
 
   <title>{{name}}</title>
-
-  <script src="https://quickresource.eyereturn.com/eyebuild/eyebuild_1_19.js"></script>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.2/TimelineMax.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.2/TweenMax.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.2/easing/EasePack.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/1.18.2/plugins/CSSPlugin.min.js"></script>
+  <script src="https://s0.2mdn.net/ads/studio/Enabler.js"></script> <!-- Enabler should always come first. -->
+  <script src="https://s0.2mdn.net/ads/studio/cached_libs/timelinemax_1.18.0_d3d029f5637c6d5b293e574d258b5eee_min.js"></script>
+  <script src="https://s0.2mdn.net/ads/studio/cached_libs/tweenmax_1.18.0_499ba64a23378545748ff12d372e59e9_min.js"></script>
+  <script src="https://s0.2mdn.net/ads/studio/cached_libs/easepack_1.18.0_ed5816e732515f56d96a67f6a2a15ccb_min.js"></script>
+  <script src="https://s0.2mdn.net/ads/studio/cached_libs/cssplugin_1.18.0_71489205621d46cbe88348eeb8fe493f_min.js"></script>
   <script src="js/vendor.js"></script> <!-- @merge: JS -->
   <script src="js/{{name}}.js"></script> <!-- @merge: JS -->
   <link rel="stylesheet" type="text/css" href="css/vendor.css"> <!-- @merge: CSS -->
-  <link rel="stylesheet" type="text/css" href="css/{{name}}.css"> <!-- @ merge: CSS -->
+  <link rel="stylesheet" type="text/css" href="css/{{name}}.css"> <!-- @merge: CSS -->
   <style>
     /* @paste: CSS */
 
@@ -41,6 +39,7 @@
 
   // Atlas and ClickTag variables:
   var atlasURL = "{{name}}.png";
+  var clickTag = "http://www.google.com";
 </script>
 
 </body>

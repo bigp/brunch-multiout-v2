@@ -72,11 +72,11 @@ var AdPreloader = (function () {
     };
     AdPreloader.prototype._preload = function () { }; //Overriden
     AdPreloader.prototype._prepareAd = function () {
-        var _THIS = this;
+        var twn, _THIS = this;
         var clickTarget = id("link");
         defaults = {
             attachTo: id("content"),
-            timeline: new TimelineMax()
+            timeline: twn = new TimelineMax()
         };
         //Create the Ad, init and play it:
         if (!window['Ad']) {
@@ -84,7 +84,7 @@ var AdPreloader = (function () {
             return;
         }
         ad = new Ad();
-        ad.play(defaults.timeline);
+        ad.play(twn);
         clickTarget.addEventListener("click", function () {
             if (!_THIS.clickTagHandler)
                 trace("No click tag");
@@ -92,12 +92,10 @@ var AdPreloader = (function () {
                 _THIS.clickTagHandler();
             ad.onClick && ad.onClick();
         });
-        defaults.timeline.call(function () {
+        twn.call(function () {
             ad.onEnd && ad.onEnd();
         });
-        _THIS._onAdCreated();
-    };
-    AdPreloader.prototype._onAdCreated = function () {
+        _THIS._onAdCreated && _THIS._onAdCreated();
     };
     return AdPreloader;
 })();
