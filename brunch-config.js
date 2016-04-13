@@ -9,23 +9,24 @@ var multiout = require("./tools/multiout/multiout.js").configMultiout({
 
   init: true,
   isDebug: isProduction==0,
-  /*pollFileChanges: {
+  pollFileChanges: {
     fileTypes: /\.png/,
+    delay: 2000,
     trigger: function() {
       multiout.before();
       multiout.sendMessage(['page']);
     }
-  },*/
+  },
 
   //isInfo: true,
-  traceWatchedFiles: true,
+  traceWatchedFiles: false,
   silenceTasks: false,
 
   before: {
     tasks: [
         //--force-publish
-      {name: 'texturepacker', args: "--force-publish --data app/{{name}}/{{name}}.less --sheet public/{{name}}.png @@app/{{name}}/images @@app/images_{{width}}x{{height}} @@app/images_common app/atlas_common.tps"},
-      {name: '%PNGQUANT%/pngquant.exe', silent: true, args: "--force --verbose --quality=60-80 --output public/{{name}}-fs8.png -- public/{{name}}.png"}
+      {name: 'texturepacker', off: true, args: "--force-publish --data app/{{name}}/{{name}}.less --sheet public/{{name}}.png @@app/{{name}}/images @@app/images_{{width}}x{{height}} @@app/images_common app/atlas_common.tps"},
+      {name: '%PNGQUANT%/pngquant.exe', off: true, silent: true, args: "--force --verbose --quality=60-80 --output public/{{name}}-fs8.png -- public/{{name}}.png"}
     ]
   },
 

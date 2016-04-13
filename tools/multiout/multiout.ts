@@ -195,7 +195,7 @@ var multiout = module.exports.multiout = {
     runCustomFileChecker: function(params) {
         var _THIS = this;
         var fileTypes = anymatch( params.fileTypes || "**/*.*" );
-        var pollRate = params.pollRate || 1000;
+        var delay = params.delay || 1000;
         var trigger = params.trigger || function() { _THIS.before(); };
         var md5Before = null, isBusy = false;
 
@@ -219,10 +219,10 @@ var multiout = module.exports.multiout = {
                 isBusy = false;
             }
             md5Before = md5Now;
-            setTimeout( callCheck, pollRate );
+            setTimeout( callCheck, delay );
         }
 
-        setTimeout( callCheck, pollRate );
+        setTimeout( callCheck, delay );
     },
 
     populateWatchedFiles: function(allFiles) {
@@ -360,7 +360,6 @@ var multiout = module.exports.multiout = {
         currentFiles.forEach( function(adUnit) {
             if(_THIS.foundPrimary!=null) {
                if(_THIS.foundPrimary!=adUnit) return;
-
             }
 
             if(!fileExists("app/" + adUnit.name)) {

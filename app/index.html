@@ -17,12 +17,11 @@
   <script src="js/vendor.js"></script> <!-- @merge: JS -->
   <script src="js/{{name}}.js"></script> <!-- @merge: JS -->
   <link rel="stylesheet" type="text/css" href="css/vendor.css"> <!-- @merge: CSS -->
-  <link rel="stylesheet" type="text/css" href="css/{{name}}.css"> <!-- @ merge: CSS -->
+  <link rel="stylesheet" type="text/css" href="css/{{name}}.css"> <!-- @merge: CSS -->
   <style>
     /* @paste: CSS */
 
     /* Ad Specific size CSS */
-    .sprite { background-image: url('{{name}}.png'); } /** ??? **/
     #content { width: {{width}}px; height: {{height}}px; }
     #border { width: {{borderWidth}}px; height: {{borderHeight}}px; }
   </style>
@@ -35,11 +34,12 @@
     <div id="border"></div>
   </a>
 </div>
+<div id="info"></div>
 
 <script>
   // @paste: JS
 
-  // Atlas and ClickTag variables:
+  // Atlas:
   var atlasURL = "{{name}}.png";
 </script>
 

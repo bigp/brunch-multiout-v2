@@ -1,0 +1,1 @@
+nodemon --watch app -e primary --exec "brunch_run.bat"
